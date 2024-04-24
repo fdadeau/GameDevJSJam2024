@@ -3,7 +3,7 @@ import { Entity } from "./entity.js";
 
 import { data } from "./loader.js";
 
-const DEBUG = true;
+const DEBUG = false;
 
 export class Meteor extends Entity {
 
@@ -11,7 +11,7 @@ export class Meteor extends Entity {
         super(x, y);
         this.vecX = Math.random() * 2 - 1;
         this.vecY = Math.random() * 2 - 1;
-        this.speed = Math.random() * 0.1 + 0.2;
+        this.speed = Math.random() * 0.3 + 0.4;
         this.angle = 0;
         this.angularSpeed = Math.random() * 0.08 - 0.04;
         this.radius = Math.floor(Math.random() * 5) * 10 + 30;

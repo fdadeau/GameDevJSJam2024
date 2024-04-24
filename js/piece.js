@@ -3,25 +3,59 @@ import { Entity } from "./entity.js";
 
 import { audio } from "./audio.js";
 
+const SIZE = 1200;
+
+import { data} from "./loader.js";
+
+export class Spaceship extends Entity {
+
+    constructor(x, y) {
+        super(x, y);
+    }
+
+    update(dt) {
+
+    }
+
+    render(ctx, player) {
+        let [x, y] = this.getCoords(player);
+        if (this.isVisible(x, y, SIZE)) {
+            ctx.drawImage(data["spaceship"], x, y, SIZE, SIZE);
+        }
+        else {
+            // indicate direction of the symbol
+            let dX = this.x - player.x, dY = this.y - player.y;
+            const [x, y] = getPointOnScreen(dX, dY);
+            ctx.fillStyle = "green";
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "black";
+        }
+    }
+
+}
+
 
 export class Piece extends Entity {
 
-    constructor(x, y, sides) {
-        super(x, y);
+    constructor(W, H, sides) {
+        super(W * Math.random(), H * Math.random());
+        this.initialX = W / 2 + Math.random() * 500 - 250;
+        this.initialY = H / 2 + Math.random() * 400 - 200;
         this.state = -1;    // -1 : deriving into space, 0 : replaced on the ship, 1 : caught by the player
         this.vecX = 0;
         this.vecY = 0;
         this.angle = 0;
-        this.initialX = x+200;
-        this.initialY = y-200;
-        this.angularSpeed = Math.random() * 0.08 - 0.04;
         this.size = Math.floor(Math.random() * 5 + 2) * 10;
+        this.angularSpeed = Math.random() * 0.08 - 0.04;
         this.points = [];
         let a = 0;
         for (let i=0; i < sides; i++) {
             this.points.push({x: Math.cos(a), y: Math.sin(a)});
             a += 2 * Math.PI / sides;
         }
+        this.hasBeenSeen = false;
     }
 
 
@@ -46,6 +80,7 @@ export class Piece extends Entity {
         ctx.fillStyle = "lightgrey";
         ctx.strokeStyle = "green";
         if (this.isVisible(x, y, this.size) && this.state !== 0) {
+            this.hasBeenSeen = true;
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(this.angle * Math.PI / 180);
@@ -58,10 +93,11 @@ export class Piece extends Entity {
             if (this.state > 0) {
                 ctx.lineWidth = 3;
                 ctx.stroke();
+                ctx.lineWidth = 1;
             }
             ctx.restore();
         }
-        else if (!this.isVisible(x, y, this.size) && this.state < 0) {
+        else if (!this.isVisible(x, y, this.size) && this.state < 0 && this.hasBeenSeen) {
             // indicate direction of the symbol
             let dX = this.x - player.x, dY = this.y - player.y;
             const [x, y] = getPointOnScreen(dX, dY);
@@ -75,15 +111,14 @@ export class Piece extends Entity {
         let [x0, y0] = this.getCoords2(player);
         if (this.isVisible(x0, y0, this.size)) {
             ctx.strokeStyle = "lightgrey";
+            ctx.fillStyle = (this.state == 0) ? "lightgray" : "black";
             ctx.beginPath();
             ctx.lineTo(x0 + this.points[0].x * this.size, y0 + this.points[0].y * this.size);
             for (let i=0; i <= this.points.length; i++) {
                 ctx.lineTo(x0 + this.points[i % this.points.length].x * this.size, y0 + this.points[i % this.points.length].y * this.size);
             }
             ctx.stroke();
-            if (this.state == 0) {
-                ctx.fill();
-            }
+            ctx.fill();
             ctx.strokeStyle = "black";
         }
         ctx.strokeStyle = "black";
@@ -104,11 +139,12 @@ export class Piece extends Entity {
     catchIt(player) {
         this.state = 1; // caught
         player.piece = this;
+        audio.playSound("replace", 1, 0.4, false);
     }
     placeIt(player) {
         this.state = 0; // placed
         player.piece = null;
-        audio.playSound("replace", 1, 0.4, false);
+        audio.playSound("takePiece", 1, 0.4, false);
     }
 
 

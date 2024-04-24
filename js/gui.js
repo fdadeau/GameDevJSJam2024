@@ -16,13 +16,9 @@ class _GUI {
         /** @type {number} Current state of the GUI */
         this.state = STATE.LOADING;
         /** @type {Game} Game instance */
-        this.game = new Game();
+        this.game = null;
         /** @type {string} debug info */
-        this.debug = null
-
-        /** Mouse down */
-        this.mouseDown = false;
-
+        this.debug = null;
     };
 
     /**
@@ -30,8 +26,12 @@ class _GUI {
      * @param {number} dt Time elpsed since last update
      */
     update(dt) {
-        if (this.state == STATE.RUNNING) {
+        if (this.state >= STATE.RUNNING) {
             this.game.update(dt);
+            if (this.game.over) {
+                this.state = STATE.GAMEOVER;
+                audio.ambiance.pause();
+            }
         }
     }
 
@@ -47,18 +47,33 @@ class _GUI {
             ctx.fillText("DEBUG: " + this.debug, 1, 10);
         }
         // draw scene
-        this.game.render(ctx);
-        if (this.state === STATE.PAUSE) {
-            ctx.textAlign = "center";
-            ctx.font = "18px arial";
-            ctx.fillText("Game paused. Press P to resume.", WIDTH / 2, HEIGHT / 2);
+        if (this.state >= STATE.RUNNING) {
+            this.game.render(ctx);
+            if (this.state === STATE.PAUSE) {
+                ctx.textAlign = "center";
+                ctx.font = "18px arial";
+                ctx.fillText("Game paused. Press P to resume.", WIDTH / 2, HEIGHT / 2);
+            }
+            else if (this.state === STATE.GAMEOVER) {
+                ctx.textAlign = "center";
+                ctx.font = "18px arial";
+                ctx.fillStyle = "white";
+                if (this.game.lost) {
+                    ctx.fillText("Game over, you lost.", WIDTH / 2, HEIGHT / 2);
+                }
+                else {
+                    ctx.fillText("You win, congratulations.", WIDTH / 2, HEIGHT / 2);
+                }
+                ctx.fillText("Click to restart.", WIDTH / 2, HEIGHT / 2 + 100);
+            }
         }
     }
 
     start() {
-        if (this.state === STATE.LOADING) {
+        if (this.state === STATE.LOADING || this.state == STATE.GAMEOVER) {
             // this.state = STATE.TITLE_SCREEN;
             this.state = STATE.RUNNING;
+            this.game = new Game();
             audio.playMusic("sndGame", 0.6);
         }
     }
@@ -112,6 +127,9 @@ class _GUI {
     mouseup(x, y) {
         if (this.state == STATE.RUNNING) {
             this.game.mouseUp(x, y);
+        }
+        else if (this.state == STATE.GAMEOVER) {
+            this.start();
         }
     }
 }

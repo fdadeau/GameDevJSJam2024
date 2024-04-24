@@ -9,6 +9,7 @@ const data = {
     fly: "assets/sprites/fly.png",
     bonus: "assets/sprites/bonus.png",
     meteor: "assets/sprites/meteor.png",
+    spaceship: "assets/sprites/navette.png",
 
     // music 
     sndGame: "assets/sounds/sound2.mp3",
@@ -17,7 +18,10 @@ const data = {
     // sound effects
     rocketFire: "assets/sounds/rocket-fire.mp3",
     impact: "assets/sounds/impact.mp3",
-    replace: "assets/sounds/replace.mp3"
+    replace: "assets/sounds/replace.mp3",
+    bonusSnd: "assets/sounds/bonus.wav",
+    takePiece: "assets/sounds/takePiece.mp3",
+    victory: "assets/sounds/victory.mp3"
 }
 
 export default data; 

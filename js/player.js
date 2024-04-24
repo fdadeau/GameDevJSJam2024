@@ -73,10 +73,11 @@ export class Player extends Entity {
     }
 
     boost() {
-        if (this.alive && this.angle == 0) {
+        if (this.alive && this.boosterTime == 0) {
             this.vecX = this.prevision.vecX;
             this.vecY = this.prevision.vecY;
             this.power = this.power - this.prevision.force;
+            this.speed /= 2;
             this.boosterTime = ACCELERATION_BY_POWER * this.prevision.force;
             this.resetAnimation(ANIMATION_FIRE);
             audio.playSound("rocketFire", 1, 0.5, false);
@@ -96,7 +97,7 @@ export class Player extends Entity {
                 vecX: Math.random() * 2 - 1,
                 vecY: Math.random() * 2 - 1,
                 size: Math.floor(Math.random() * 3 + 5),
-                speed: Math.random() + 1,
+                speed: Math.random() * this.speed + 0.2,
                 round: Math.random() < 0.5 ? 0 : 1
             });
         }
@@ -189,12 +190,15 @@ export class Player extends Entity {
 
 
         if (this.prevision.force > 0) {
-            ctx.fillText(`dX = ${this.prevision.vecX}, dY = ${this.prevision.vecY}, force = ${this.prevision.force}`, 10, 400);
+            //ctx.fillText(`dX = ${this.prevision.vecX}, dY = ${this.prevision.vecY}, force = ${this.prevision.force}`, 10, 400);
             ctx.strokeStyle = "orange";
             ctx.lineWidth = 4;
+            ctx.beginPath();
             ctx.moveTo(WIDTH/2, HEIGHT/2);
-            ctx.lineTo(WIDTH/2 + this.prevision.vecX * MAX_LEN * this.prevision.force, HEIGHT/2 + this.prevision.vecY * MAX_LEN * this.prevision.force);
+            ctx.lineTo(WIDTH/2 + this.prevision.vecX * (this.size + MAX_LEN * this.prevision.force), HEIGHT/2 + this.prevision.vecY * (this.size + MAX_LEN * this.prevision.force));
             ctx.stroke();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 1;
         }
 
         let angle = getAngle(this.vecX, this.vecY);
@@ -205,7 +209,7 @@ export class Player extends Entity {
         if (this.vecX < 0) {
             ctx.scale(1,-1);
         }
-        ctx.drawImage(data["fly"], 0, 64 * this.animation.frames[this.animation.step], 64, 64, -32, -32, 58, 58);
+        ctx.drawImage(data["fly"], 0, 1+ 64 * this.animation.frames[this.animation.step], 64, 64, -32, -32, 58, 58);
         ctx.restore();
         // display player hud
         ctx.fillStyle = ctx.strokeStyle = "white";
@@ -224,10 +228,10 @@ export class Player extends Entity {
             ctx.strokeStyle = "red";
             ctx.beginPath();
             ctx.arc(WIDTH/2, HEIGHT/2, SIZE, 0, Math.PI * 2);
-            ctx.closePath();
             ctx.stroke();
         }
         ctx.strokeStyle = "black";
+        ctx.fillStyle = "black";
         ctx.lineWidth = 1;
     }
 

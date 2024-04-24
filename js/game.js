@@ -4,7 +4,10 @@
 // dimensions of the world
 export const WORLD_W = 8000, WORLD_H = 5000;
 // 
-const NB_OBSTACLES = 100; 
+
+import { WIDTH } from "./app.js";
+
+const NB_STARS = 200; 
 const NB_BONUSES = 20;
 
 // trail size to reach maximal power
@@ -12,34 +15,53 @@ const MAX_LEN = 200;
 
 import { Player } from "./player.js";
 import { Star } from "./star.js";
-import { Barrier } from "./barrier.js";
 
 import { Bonus } from "./bonus.js";
-import { Piece } from "./piece.js";
+import { Piece, Spaceship } from "./piece.js";
 import { Meteor } from "./meteor.js";
 
+import { audio } from "./audio.js";
 
+const TIME = 300;
 
 export class Game {
 
     constructor() {
-        // Small character 
-        this.player = new Player(WORLD_W/2,WORLD_H/2);
+        // Small robot character
+        this.player = new Player(WORLD_W/2, WORLD_H/2);
+    
+        this.spaceship = new Spaceship(WORLD_W / 2 - 400, WORLD_H / 2 - 400);
         // 
-        this.obstacles = [];
-        while (this.obstacles.length < NB_OBSTACLES) {
-            this.obstacles.push(new Star(Math.random() * WORLD_W, Math.random() * WORLD_H));
+        this.stars = [];
+        while (this.stars.length < NB_STARS) {
+            this.stars.push(new Star(Math.random() * WORLD_W, Math.random() * WORLD_H));
         }
-        this.barrier = new Barrier(WORLD_W / 2, WORLD_H / 2 + 200);
+        
         this.bonuses = [];
         this.bonuses.push(new Bonus(WORLD_W/2 + 100, WORLD_H/2+100));
         while (this.bonuses.length < NB_BONUSES) {
             this.bonuses.push(new Bonus(Math.random() * WORLD_W, Math.random() * WORLD_H));
-            console.log(this.bonuses[this.bonuses.length-1].x, this.bonuses[this.bonuses.length-1].y);
         }
-        this.piece = new Piece(WORLD_W / 2 - 200, WORLD_H / 2 + 200, 5);
-        this.meteor = new Meteor(WORLD_W / 2 - 200, WORLD_H / 2 - 200);
-        //
+
+        this.pieces = [];
+        for (let sides = 3; sides <= 9; sides++) {
+            let p0;
+            do {
+                p0 = new Piece(WORLD_W, WORLD_H, sides)
+            }
+            while (false && this.pieces.some(p => (p.initialX-p0.initialX)*(p.initialY-p0.initialY) <= (2*p.size+p0.size)*(2*p.size+p0.size)));
+            this.pieces.push(p0);
+        }
+
+        this.meteors = [];
+        while (this.meteors.length < 10) {
+            this.meteors.push(new Meteor(WORLD_W * Math.random(), WORLD_H * Math.random()));
+        }
+        
+        this.time = TIME * 1000;
+
+        this.over = false;
+        this.lost = false;
 
         this.down = { x: -1, y: -1 };
         this.mouse = { x: 0, y: 0 };
@@ -50,31 +72,55 @@ export class Game {
      * @param {number} dt elapsed time since last update
      */
     update(dt) {
+
+        if (!this.over) {
+            this.time -= dt;
+            if (this.time <= 0) {
+                this.time = 0;
+                this.over = true;
+                //this.lost = true;
+                audio.playSound("victory");
+            }
+        }
+
         this.player.update(dt);
-        this.obstacles.forEach(o => o.update(dt));
-        this.barrier.update(dt);
+        
+        this.stars.forEach(o => o.update(dt));
+        
         this.bonuses = this.bonuses.filter(b => {
             b.update(dt);
             if (b.collidesWith(this.player)) {
                 this.player.power = 1;
+                audio.playSound("bonusSnd");
                 return false;
             }
             return true;
         });
-        this.meteor.update(dt);
-        if (this.meteor.collidesWith(this.player)) {
-            this.player.die();
-            return;
-        }
+
+        this.meteors.forEach(m => {
+            m.update(dt);
+            if (this.player.alive && m.collidesWith(this.player)) {
+                this.player.die();
+                this.over = true;
+                this.lost = true;
+            }
+        });
         
-        if (this.piece.state < 0) {
-            this.piece.update(dt);
-        }
-        if (this.piece.canBeCaught(this.player)) {
-            this.piece.catchIt(this.player);
-        }
-        else if (this.piece.canBePlaced(this.player)) {
-            this.piece.placeIt(this.player);
+        this.pieces.forEach(p => {
+            if (p.state < 0) {
+                p.update(dt);
+            }
+            if (p.canBeCaught(this.player)) {
+                p.catchIt(this.player);
+            }
+            else if (p.canBePlaced(this.player)) {
+                p.placeIt(this.player);
+            }
+        });
+
+        if (this.pieces.every(p => p.state == 0)) {
+            this.over = true;
+            audio.playSound("victory");
         }
     }
 
@@ -83,15 +129,22 @@ export class Game {
      * @param {CanvasRenderingContext2D} ctx the context to be drawn
      */
     render(ctx) {
-        ctx.font = "10px arial";
+        ctx.font = "12px arial";
+        ctx.textAlign = "right";
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 4;
+        let t = Math.floor(this.time / 1000);
+        ctx.strokeText(`${Math.floor(t / 60)}:${t % 60 < 10 ? 0 : ''}${t % 60}`, WIDTH-10, 18);
+        ctx.fillText(`${Math.floor(t / 60)}:${t % 60 < 10 ? 0 : ''}${t % 60}`, WIDTH-10, 18);
         ctx.textAlign = "left";
-        ctx.fillText(`Player : x = ${this.player.x | 0}, y = ${this.player.y | 0}`, 5, 490);
-        this.obstacles.forEach(o => o.render(ctx, this.player));
+        //ctx.fillText(`Player : x = ${this.player.x | 0}, y = ${this.player.y | 0}`, 5, 490);
+        this.stars.forEach(o => o.render(ctx, this.player));
+        this.spaceship.render(ctx, this.player);
         this.bonuses.forEach(b => b.render(ctx, this.player));
-        this.barrier.render(ctx, this.player);
-        this.piece.render(ctx, this.player);
-        this.meteor.render(ctx, this.player);
+        this.pieces.forEach(p => p.render(ctx, this.player));
         this.player.render(ctx);
+        this.meteors.forEach(m => m.render(ctx, this.player));
     }
 
     mouseDown(x, y) {
