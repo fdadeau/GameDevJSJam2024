@@ -10,6 +10,8 @@ const STATE = { LOADING: -999, TITLE_SCREEN: 0, RUNNING: 1, PAUSE: 10, GAMEOVER:
 
 import { audio } from "./audio.js";
 
+import { data } from "./loader.js";
+
 class _GUI {
 
     constructor() {
@@ -46,6 +48,22 @@ class _GUI {
             ctx.font = "10px arial";
             ctx.fillText("DEBUG: " + this.debug, 1, 10);
         }
+
+        if (this.state == STATE.TITLE_SCREEN) {
+            ctx.textAlign = "center";
+            ctx.font = "18px arial";
+            ctx.drawImage(data["title"], WIDTH / 2 - 200, HEIGHT/ 2 - 100, 400, 100);
+            ctx.drawImage(data["logo"], WIDTH - 140, HEIGHT - 50, 120, 40);
+            ctx.fillText("Manage your power to retrieve pieces of the spaceship.", WIDTH / 2, HEIGHT / 2 + 100);
+            ctx.fillText("Click to start.", WIDTH / 2, HEIGHT / 2 + 200);
+            return;
+        } 
+
+        if (this.state == STATE.COMMANDS) {
+            this.commands(ctx);
+            return;
+        }
+
         // draw scene
         if (this.state >= STATE.RUNNING) {
             this.game.render(ctx);
@@ -71,11 +89,17 @@ class _GUI {
 
     start() {
         if (this.state === STATE.LOADING || this.state == STATE.GAMEOVER) {
-            // this.state = STATE.TITLE_SCREEN;
-            this.state = STATE.RUNNING;
+            this.state = STATE.TITLE_SCREEN;
             this.game = new Game();
             audio.playMusic("sndGame", 0.6);
         }
+    }
+
+
+    commands(ctx) {
+        ctx.textAlign = "center";
+        ctx.font = "18px arial";
+        ctx.fillText("How to play", WIDTH / 2, 100)
     }
 
 
@@ -125,7 +149,13 @@ class _GUI {
         }
     }
     mouseup(x, y) {
-        if (this.state == STATE.RUNNING) {
+        if (this.state == STATE.TITLE_SCREEN) {
+            this.state = STATE.COMMANDS;
+        }
+        else if (this.state == STATE.COMMANDS) {
+            this.state = STATE.RUNNING;
+        }
+        else if (this.state == STATE.RUNNING) {
             this.game.mouseUp(x, y);
         }
         else if (this.state == STATE.GAMEOVER) {

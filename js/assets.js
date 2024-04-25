@@ -4,7 +4,9 @@
 const data = {
     
     // images (backgrounds, titles, etc.)
-    
+    title: "assets/logos/title.png",
+    logo: "assets/logos/gamedevjs.png",
+
     // spritesheets
     fly: "assets/sprites/fly.png",
     bonus: "assets/sprites/bonus.png",

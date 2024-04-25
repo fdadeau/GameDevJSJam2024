@@ -30,7 +30,7 @@ export class Game {
         // Small robot character
         this.player = new Player(WORLD_W/2, WORLD_H/2);
     
-        this.spaceship = new Spaceship(WORLD_W / 2 - 400, WORLD_H / 2 - 400);
+        this.spaceship = new Spaceship(WORLD_W / 2, WORLD_H / 2);
         // 
         this.stars = [];
         while (this.stars.length < NB_STARS) {
@@ -43,13 +43,20 @@ export class Game {
             this.bonuses.push(new Bonus(Math.random() * WORLD_W, Math.random() * WORLD_H));
         }
 
+        const W = WORLD_W / 2, H = WORLD_H / 2;
+        const PLACES = [ 
+            [W-370,H-10,30], [W-180,H-10,60], [W+60,H+10,40], [W+210,H-0,30], 
+            [W-110,H+90,50], [W+250,H+120,40], [W+420,H+100,30]
+        ];
         this.pieces = [];
         for (let sides = 3; sides <= 9; sides++) {
             let p0;
-            do {
-                p0 = new Piece(WORLD_W, WORLD_H, sides)
-            }
-            while (false && this.pieces.some(p => (p.initialX-p0.initialX)*(p.initialY-p0.initialY) <= (2*p.size+p0.size)*(2*p.size+p0.size)));
+            let xy = PLACES.splice(Math.random() * PLACES.length | 0, 1);
+            console.log(xy);
+            //do {
+                p0 = new Piece(WORLD_W, WORLD_H, xy[0], sides)
+            //}
+            //while (false && this.pieces.some(p => (p.initialX-p0.initialX)*(p.initialY-p0.initialY) <= (2*p.size+p0.size)*(2*p.size+p0.size)));
             this.pieces.push(p0);
         }
 
@@ -141,8 +148,8 @@ export class Game {
         //ctx.fillText(`Player : x = ${this.player.x | 0}, y = ${this.player.y | 0}`, 5, 490);
         this.stars.forEach(o => o.render(ctx, this.player));
         this.spaceship.render(ctx, this.player);
-        this.bonuses.forEach(b => b.render(ctx, this.player));
         this.pieces.forEach(p => p.render(ctx, this.player));
+        this.bonuses.forEach(b => b.render(ctx, this.player));
         this.player.render(ctx);
         this.meteors.forEach(m => m.render(ctx, this.player));
     }
