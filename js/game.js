@@ -85,8 +85,9 @@ export class Game {
             if (this.time <= 0) {
                 this.time = 0;
                 this.over = true;
-                //this.lost = true;
-                audio.playSound("victory");
+                this.lost = true;
+                audio.pause();
+                //audio.playSound("victory");
             }
         }
 
