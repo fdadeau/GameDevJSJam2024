@@ -11,7 +11,8 @@ Avoid collisions with neaby asteroids, and don't waste your time!
 
 ## How to play
 
-Mouse only. Press left button and move the mouse to adjust the propulsion power and angle. Reach the spaceship fragments and stop on them to grab. Bring them back to the ship and stop on their corresponding location to replace them.
+Mouse only. Press left button and move the mouse to adjust the propulsion power and angle. Release button to fire the rocket. 
+Reach the spaceship fragments and stop on them to grab. Bring them back to the ship and stop on their corresponding location to replace them.
 
 ## About the game
 
