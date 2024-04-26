@@ -222,11 +222,6 @@ class _GUI {
         }
     }
     mousedown(x, y) {
-        if (this.state == STATE.RUNNING) {
-            this.game.mouseDown(x, y);
-        }
-    }
-    mouseup(x, y) {
         if (this.state == STATE.TITLE_SCREEN) {
             this.state = STATE.COMMANDS;
         }
@@ -234,10 +229,15 @@ class _GUI {
             this.state = STATE.RUNNING;
         }
         else if (this.state == STATE.RUNNING) {
-            this.game.mouseUp(x, y);
+            this.game.mouseDown(x, y);
         }
         else if (this.state == STATE.GAMEOVER) {
             this.start();
+        }
+    }
+    mouseup(x, y) {
+        if (this.state == STATE.RUNNING) {
+            this.game.mouseUp(x, y);
         }
     }
 }
