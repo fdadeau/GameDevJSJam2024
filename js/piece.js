@@ -78,23 +78,6 @@ export class Piece extends Entity {
             x = WIDTH / 2;
             y = HEIGHT / 2;
         }
-        else if (this.state == 0) {
-            [x,y] = this.getCoords2(player);
-        }
-
-        let [x0, y0] = this.getCoords2(player);
-        if (this.isVisible(x0, y0, this.size)) {
-            ctx.strokeStyle = "#C7C7C7";
-            ctx.fillStyle = (this.state == 0) ? "#C7C7C7" : "black";
-            ctx.beginPath();
-            ctx.lineTo(x0 + this.points[0].x * this.size, y0 + this.points[0].y * this.size);
-            for (let i=0; i <= this.points.length; i++) {
-                ctx.lineTo(x0 + this.points[i % this.points.length].x * this.size, y0 + this.points[i % this.points.length].y * this.size);
-            }
-            ctx.stroke();
-            ctx.fill();
-            ctx.strokeStyle = "black";
-        }
 
         ctx.fillStyle = "#C7C7C7";
         ctx.strokeStyle = "green";
@@ -130,6 +113,26 @@ export class Piece extends Entity {
         ctx.strokeStyle = "black";
         ctx.fillStyle = "black";        
         ctx.lineWidth = 1;
+    }
+
+
+    drawOnBackground(ctx, player) {
+        if (this.state == 0) {
+            return;
+        }
+         let [x0, y0] = this.getCoords2(player);
+        if (this.isVisible(x0, y0, this.size)) {
+            ctx.strokeStyle = "#C7C7C7";
+            ctx.fillStyle = "black";
+            ctx.beginPath();
+            ctx.lineTo(x0 + this.points[0].x * this.size, y0 + this.points[0].y * this.size);
+            for (let i=0; i <= this.points.length; i++) {
+                ctx.lineTo(x0 + this.points[i % this.points.length].x * this.size, y0 + this.points[i % this.points.length].y * this.size);
+            }
+            ctx.stroke();
+            ctx.fill();
+            ctx.strokeStyle = "black";
+        }
     }
 
 

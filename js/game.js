@@ -149,6 +149,7 @@ export class Game {
         //ctx.fillText(`Player : x = ${this.player.x | 0}, y = ${this.player.y | 0}`, 5, 490);
         this.stars.forEach(o => o.render(ctx, this.player));
         this.spaceship.render(ctx, this.player);
+        this.pieces.forEach(p => p.drawOnBackground(ctx, this.player));
         this.pieces.forEach(p => p.render(ctx, this.player));
         this.bonuses.forEach(b => b.render(ctx, this.player));
         this.player.render(ctx);
