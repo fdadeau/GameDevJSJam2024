@@ -52,11 +52,7 @@ export class Game {
         for (let sides = 3; sides <= 9; sides++) {
             let p0;
             let xy = PLACES.splice(Math.random() * PLACES.length | 0, 1);
-            console.log(xy);
-            //do {
-                p0 = new Piece(WORLD_W, WORLD_H, xy[0], sides)
-            //}
-            //while (false && this.pieces.some(p => (p.initialX-p0.initialX)*(p.initialY-p0.initialY) <= (2*p.size+p0.size)*(2*p.size+p0.size)));
+            p0 = new Piece(WORLD_W, WORLD_H, xy[0], sides)
             this.pieces.push(p0);
         }
 
