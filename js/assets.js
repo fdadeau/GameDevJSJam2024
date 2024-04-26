@@ -7,6 +7,10 @@ const data = {
     title: "assets/logos/title.png",
     logo: "assets/logos/gamedevjs.png",
 
+    commands1: "assets/logos/commands1.png",
+    commands2: "assets/logos/commands2.png",
+    commands3: "assets/logos/commands3.png",
+    
     // spritesheets
     fly: "assets/sprites/fly.png",
     bonus: "assets/sprites/bonus.png",

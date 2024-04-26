@@ -21,6 +21,8 @@ class _GUI {
         this.game = null;
         /** @type {string} debug info */
         this.debug = null;
+
+        this.char = { angle: 0, delay: 120, frame: 4, boostTime: 0, waitTime: 2000 };
     };
 
     /**
@@ -28,6 +30,46 @@ class _GUI {
      * @param {number} dt Time elpsed since last update
      */
     update(dt) {
+        if (this.state == STATE.TITLE_SCREEN) {
+            if (this.char.boostTime > 0) {
+                this.char.boostTime -= dt;
+                this.char.delay -= dt;
+                if (this.char.angle < 80) {
+                    this.char.angle += 0.1 * dt;
+                    if (this.char.angle >= 80) {
+                        this.char.angle = 80;
+                    }
+                }
+                if (this.char.delay < 0) {
+                    this.char.delay = 120;
+                    this.char.frame = (this.char.frame + 1) % 4;
+                }
+                if (this.char.boostTime <= 0) {
+                    this.char.waitTime = 1600;
+                    this.char.boostTime = 0;
+                    this.char.frame = 4;
+                }
+            }
+            else {
+                this.char.angle -= 0.1 * dt;
+                if (this.char.angle < 0) {
+                    this.char.angle = 0;
+                }
+                this.char.waitTime -= dt;
+                if (this.char.waitTime < 0) {
+                    this.char.boostTime = 3000;
+                }
+            }
+            return;
+        }
+        if (this.state == STATE.COMMANDS) {
+            this.char.delay -= dt;
+            if (this.char.delay < 0) {
+                this.char.delay = 120;
+                this.char.frame = (this.char.frame + 1) % 4;
+            }
+            return;
+        }
         if (this.state >= STATE.RUNNING) {
             this.game.update(dt);
             if (this.game.over) {
@@ -52,10 +94,15 @@ class _GUI {
         if (this.state == STATE.TITLE_SCREEN) {
             ctx.textAlign = "center";
             ctx.font = "18px arial";
-            ctx.drawImage(data["title"], WIDTH / 2 - 200, HEIGHT/ 2 - 100, 400, 100);
+            ctx.drawImage(data["title"], WIDTH / 2 - 300, HEIGHT/ 2 - 100, 600, 80);
             ctx.drawImage(data["logo"], WIDTH - 140, HEIGHT - 50, 120, 40);
+            ctx.save();
+            ctx.translate(WIDTH / 2, HEIGHT / 2 + 30);
+            ctx.rotate(this.char.angle * Math.PI / 180);
+            ctx.drawImage(data["fly"], 0, 64*this.char.frame, 64, 64, -32, -32, 64, 64);
+            ctx.restore();
             ctx.fillText("Manage your power to retrieve pieces of the spaceship.", WIDTH / 2, HEIGHT / 2 + 100);
-            ctx.fillText("Click to start.", WIDTH / 2, HEIGHT / 2 + 200);
+            ctx.fillText("Click to start", WIDTH / 2, HEIGHT / 2 + 200);
             return;
         } 
 
@@ -98,8 +145,39 @@ class _GUI {
 
     commands(ctx) {
         ctx.textAlign = "center";
-        ctx.font = "18px arial";
-        ctx.fillText("How to play", WIDTH / 2, 100)
+        ctx.font = "24px arial";
+        ctx.fillText("How to play", WIDTH / 2, 50)
+        ctx.textAlign = "left";
+        const y0 = 100;
+        ctx.font = "16px arial";
+
+        ctx.drawImage(data["meteor"], 0, 0, 64, 64, 200, 400, 64, 64);
+        ctx.drawImage(data["fly"], 0, 64*this.char.frame, 64, 64, 20, y0 - 20, 58, 58);
+        ctx.drawImage(data["bonus"], 15*64, 0, 64, 64, 20, 270, 32, 32);
+        ctx.drawImage(data["commands1"], 540, 140, 170, 120);
+        ctx.drawImage(data["commands2"], 500, 300, 120, 90);
+        ctx.drawImage(data["commands3"], 650, 320, 80, 70);
+        
+
+        ctx.fillText("Your spaceship is broken!", 90, y0);
+        ctx.fillText("Help RAWD-E (Repair And Wander Droid) to find and bring back the pieces of the ship.", 90, y0+30);
+
+        ctx.fillText("Press down mouse left button and adjust the power by moving the mouse.", 20, y0+80);
+        ctx.fillText("An orange line will show the direction and force applied to the movement.", 20, y0+110);
+        ctx.fillText("Release the button to propel RAWD-E through space.", 20, y0+140);
+
+        ctx.fillText("Propulsion costs power but it can be regained automatically or by picking up bonuses. ", 60, y0 + 190);
+
+        ctx.fillText("Stop RAWD-E on a ship fragment to take it with you.", 20, y0 + 240);
+        ctx.fillText("Bring the fragment to its ship hole, and stop on it to repair the ship. ", 20, y0 + 270);
+        ctx.fillText("→", 630, y0+250);
+
+        ctx.fillText("Your time is limited and the place is full of meteors, so be quick, but be careful.", 20, y0+320);
+
+        ctx.textAlign = "center";
+        ctx.font = "20px arial";
+        ctx.fillText("Ready ? Click to start! ", WIDTH / 2, HEIGHT - 20);
+
     }
 
 
